@@ -37,18 +37,25 @@ app.use(cors());
 app.use(express.json());
 
 // Start defining your routes here
-app.get("/", (req, res) => {
-  res.send("Hello world");
+app.get("/thoughts", async (req, res) => {
+  try {
+    const thoughts = await Thought.find().sort({ createdAt: "desc" }).limit();
+    res.status(200).json({ response: thoughts, success: true });
+  } catch (error) {
+    res.status(400).json({ message: "no thoughts here", success: false });
+  }
 });
 
 app.post("/thoughts", async (req, res) => {
   const { message } = req.body;
 
   try {
-    const thoughts = await Thought.find().sort({ createdAt: "desc" }).limit();
-    res.status(200).json({ response: thoughts, success: true });
+    const thought = await new Thought({ message: message }).save();
+    res.status(201).json(thought);
   } catch (error) {
-    res.status(400).json({ message: "no thoughts here", success: false });
+    res
+      .status(400)
+      .json({ message: "not possible to save thought", success: false });
   }
 });
 
